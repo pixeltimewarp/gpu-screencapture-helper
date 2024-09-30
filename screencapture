@@ -1,0 +1,21 @@
+LOG_FILE="$HOME/Videos/recording_log.txt"
+
+# Dodaj logowanie
+echo "$(date +'%Y-%m-%d %H:%M:%S') - Sprawdzenie stanu gpu-screen-recorder" >> "$LOG_FILE"
+if ps aux | grep "[g]pu-screen-recorder" > /dev/null; then
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - Proces działa, kończenie nagrania." >> "$LOG_FILE"
+    notify-send -t 1000 "Nagrywanie zakończone"
+    killall gpu-screen-recorder
+else
+    echo "$(date +'%Y-%m-%d %H:%M:%S') - Uruchamianie nagrywania..." >> "$LOG_FILE"
+    notify-send -t 1000 "Rozpoczynanie nagrywania..."
+    nohup gpu-screen-recorder -w screen -f 60 -a default_output -o "$HOME/Videos/video_$(date +%Y-%m-%d_%H-%M-%S).mp4" > /dev/null 2>&1 &
+    sleep 1
+    if ps aux | grep "[g]pu-screen-recorder" > /dev/null; then
+        echo "$(date +'%Y-%m-%d %H:%M:%S') - Nagrywanie rozpoczęte." >> "$LOG_FILE"
+        notify-send -t 1000 "Nagrywanie rozpoczęte"
+    else
+        echo "$(date +'%Y-%m-%d %H:%M:%S') - Błąd: nie udało się uruchomić nagrywania!" >> "$LOG_FILE"
+        notify-send -t 1000 "Błąd: nie udało się uruchomić nagrywania!"
+    fi
+fi
